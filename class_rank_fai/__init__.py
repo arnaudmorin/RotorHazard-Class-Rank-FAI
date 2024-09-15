@@ -109,8 +109,11 @@ class FaiRank():
             # Let's build our class rank now
             results = {}
             # Get heats of this class
-            heats = self._rhapi.db.heats_by_class(race_class.id)
+            # Heats are supposed to be sorted from DB but better safe than sorry
+            heats = [heat for heat in sorted(self._rhapi.db.heats_by_class(race_class.id), key=lambda h: h.id)]
+            heat_number = 0
             for heat in heats:
+                heat_number += 1
                 races = self._rhapi.db.races_by_heat(heat.id)
 
                 for race in races:
@@ -131,12 +134,13 @@ class FaiRank():
                                 'points': 0,
                             }
                             # Handle chase-the-ace (successive final races in FAI doc)
+                            # TODO stop using Final, but last of len(heats) instead
                             if heat.name == "Final" and args['rank-fai-cta']:
                                 if result['position'] == 1:
                                     new_pilot_result['win'] = 1
                                 new_pilot_result['points'] = result['position']
-                                if heat.name in results:
-                                    for r in results[heat.name].values():
+                                if heat_number in results:
+                                    for r in results[heat_number].values():
                                         if r['pilot_id'] == pilot.id:
                                             # We increase the point based on the position - this is how FAI does
                                             if result['position']:
@@ -168,7 +172,7 @@ class FaiRank():
                     # Add this result, this may override a previous race that was done
                     # for the same heat ID, but that's fine, we are looping over race in
                     # ordered way so we should have the latest one
-                    results[heat.name] = raceresults
+                    results[heat_number] = raceresults
 
             if bracket_type == 'fai64de':
                 leaderboard = self.build_leaderboard_fai64de(results, q_pilots)
@@ -200,82 +204,82 @@ class FaiRank():
     def build_leaderboard_fai64de(self, results, q_pilots):
         # 9 to 12: 3 and 4 in race 57 and 58
         a = [
-            self.try_get_value(results, 'Race 57', 3),
-            self.try_get_value(results, 'Race 57', 4),
-            self.try_get_value(results, 'Race 58', 3),
-            self.try_get_value(results, 'Race 58', 4),
+            self.try_get_value(results, 57, 3),
+            self.try_get_value(results, 57, 4),
+            self.try_get_value(results, 58, 3),
+            self.try_get_value(results, 58, 4),
         ]
 
         # 13 to 16: 3 and 4 in race 53 and 54
         b = [
-            self.try_get_value(results, 'Race 53', 3),
-            self.try_get_value(results, 'Race 53', 4),
-            self.try_get_value(results, 'Race 54', 3),
-            self.try_get_value(results, 'Race 54', 4),
+            self.try_get_value(results, 53, 3),
+            self.try_get_value(results, 53, 4),
+            self.try_get_value(results, 54, 3),
+            self.try_get_value(results, 54, 4),
         ]
 
         # 17 to 24: 3 and 4 in race 49 to 52
         c = [
-            self.try_get_value(results, 'Race 49', 3),
-            self.try_get_value(results, 'Race 49', 4),
-            self.try_get_value(results, 'Race 50', 3),
-            self.try_get_value(results, 'Race 50', 4),
-            self.try_get_value(results, 'Race 51', 3),
-            self.try_get_value(results, 'Race 51', 4),
-            self.try_get_value(results, 'Race 52', 3),
-            self.try_get_value(results, 'Race 52', 4),
+            self.try_get_value(results, 49, 3),
+            self.try_get_value(results, 49, 4),
+            self.try_get_value(results, 50, 3),
+            self.try_get_value(results, 50, 4),
+            self.try_get_value(results, 51, 3),
+            self.try_get_value(results, 51, 4),
+            self.try_get_value(results, 52, 3),
+            self.try_get_value(results, 52, 4),
         ]
 
         # 25 to 32: 3 and 4 in race 41 to 44
         d = [
-            self.try_get_value(results, 'Race 41', 3),
-            self.try_get_value(results, 'Race 41', 4),
-            self.try_get_value(results, 'Race 42', 3),
-            self.try_get_value(results, 'Race 42', 4),
-            self.try_get_value(results, 'Race 43', 3),
-            self.try_get_value(results, 'Race 43', 4),
-            self.try_get_value(results, 'Race 44', 3),
-            self.try_get_value(results, 'Race 44', 4),
+            self.try_get_value(results, 41, 3),
+            self.try_get_value(results, 41, 4),
+            self.try_get_value(results, 42, 3),
+            self.try_get_value(results, 42, 4),
+            self.try_get_value(results, 43, 3),
+            self.try_get_value(results, 43, 4),
+            self.try_get_value(results, 44, 3),
+            self.try_get_value(results, 44, 4),
         ]
 
         # 33 to 48: 3 and 4 in race 33 to 40
         e = [
-            self.try_get_value(results, 'Race 33', 3),
-            self.try_get_value(results, 'Race 33', 4),
-            self.try_get_value(results, 'Race 34', 3),
-            self.try_get_value(results, 'Race 34', 4),
-            self.try_get_value(results, 'Race 35', 3),
-            self.try_get_value(results, 'Race 35', 4),
-            self.try_get_value(results, 'Race 36', 3),
-            self.try_get_value(results, 'Race 36', 4),
-            self.try_get_value(results, 'Race 37', 3),
-            self.try_get_value(results, 'Race 37', 4),
-            self.try_get_value(results, 'Race 38', 3),
-            self.try_get_value(results, 'Race 38', 4),
-            self.try_get_value(results, 'Race 39', 3),
-            self.try_get_value(results, 'Race 39', 4),
-            self.try_get_value(results, 'Race 40', 3),
-            self.try_get_value(results, 'Race 40', 4),
+            self.try_get_value(results, 33, 3),
+            self.try_get_value(results, 33, 4),
+            self.try_get_value(results, 34, 3),
+            self.try_get_value(results, 34, 4),
+            self.try_get_value(results, 35, 3),
+            self.try_get_value(results, 35, 4),
+            self.try_get_value(results, 36, 3),
+            self.try_get_value(results, 36, 4),
+            self.try_get_value(results, 37, 3),
+            self.try_get_value(results, 37, 4),
+            self.try_get_value(results, 38, 3),
+            self.try_get_value(results, 38, 4),
+            self.try_get_value(results, 39, 3),
+            self.try_get_value(results, 39, 4),
+            self.try_get_value(results, 40, 3),
+            self.try_get_value(results, 40, 4),
         ]
 
         # 49 to 64: 3 and 4 in race 25 to 32
         f = [
-            self.try_get_value(results, 'Race 25', 3),
-            self.try_get_value(results, 'Race 25', 4),
-            self.try_get_value(results, 'Race 26', 3),
-            self.try_get_value(results, 'Race 26', 4),
-            self.try_get_value(results, 'Race 27', 3),
-            self.try_get_value(results, 'Race 27', 4),
-            self.try_get_value(results, 'Race 28', 3),
-            self.try_get_value(results, 'Race 28', 4),
-            self.try_get_value(results, 'Race 29', 3),
-            self.try_get_value(results, 'Race 29', 4),
-            self.try_get_value(results, 'Race 30', 3),
-            self.try_get_value(results, 'Race 30', 4),
-            self.try_get_value(results, 'Race 31', 3),
-            self.try_get_value(results, 'Race 31', 4),
-            self.try_get_value(results, 'Race 32', 3),
-            self.try_get_value(results, 'Race 32', 4),
+            self.try_get_value(results, 25, 3),
+            self.try_get_value(results, 25, 4),
+            self.try_get_value(results, 26, 3),
+            self.try_get_value(results, 26, 4),
+            self.try_get_value(results, 27, 3),
+            self.try_get_value(results, 27, 4),
+            self.try_get_value(results, 28, 3),
+            self.try_get_value(results, 28, 4),
+            self.try_get_value(results, 29, 3),
+            self.try_get_value(results, 29, 4),
+            self.try_get_value(results, 30, 3),
+            self.try_get_value(results, 30, 4),
+            self.try_get_value(results, 31, 3),
+            self.try_get_value(results, 31, 4),
+            self.try_get_value(results, 32, 3),
+            self.try_get_value(results, 32, 4),
         ]
 
         # Sort them based on qualifications
@@ -283,17 +287,19 @@ class FaiRank():
         b = sorted(b, key=lambda pilot: q_pilots.index(pilot['pilot_id']))
         c = sorted(c, key=lambda pilot: q_pilots.index(pilot['pilot_id']))
         d = sorted(d, key=lambda pilot: q_pilots.index(pilot['pilot_id']))
+        e = sorted(e, key=lambda pilot: q_pilots.index(pilot['pilot_id']))
+        f = sorted(f, key=lambda pilot: q_pilots.index(pilot['pilot_id']))
 
         # Build our final leaderboard
         return [
-            self.try_get_value(results, 'Final', 1),
-            self.try_get_value(results, 'Final', 2),
-            self.try_get_value(results, 'Final', 3),
-            self.try_get_value(results, 'Final', 4),
-            self.try_get_value(results, 'Race 61', 3),
-            self.try_get_value(results, 'Race 61', 4),
-            self.try_get_value(results, 'Race 59', 3),
-            self.try_get_value(results, 'Race 59', 4),
+            self.try_get_value(results, 62, 1),
+            self.try_get_value(results, 62, 2),
+            self.try_get_value(results, 62, 3),
+            self.try_get_value(results, 62, 4),
+            self.try_get_value(results, 61, 3),
+            self.try_get_value(results, 61, 4),
+            self.try_get_value(results, 59, 3),
+            self.try_get_value(results, 59, 4),
             a[0],
             a[1],
             a[2],
@@ -355,70 +361,70 @@ class FaiRank():
     def build_leaderboard_fai64(self, results, q_pilots):
         # 9 to 16: 3 and 4 in race 25 to 28
         a = [
-            self.try_get_value(results, 'Race 25', 3),
-            self.try_get_value(results, 'Race 25', 4),
-            self.try_get_value(results, 'Race 26', 3),
-            self.try_get_value(results, 'Race 26', 4),
-            self.try_get_value(results, 'Race 27', 3),
-            self.try_get_value(results, 'Race 27', 4),
-            self.try_get_value(results, 'Race 28', 3),
-            self.try_get_value(results, 'Race 28', 4),
+            self.try_get_value(results, 25, 3),
+            self.try_get_value(results, 25, 4),
+            self.try_get_value(results, 26, 3),
+            self.try_get_value(results, 26, 4),
+            self.try_get_value(results, 27, 3),
+            self.try_get_value(results, 27, 4),
+            self.try_get_value(results, 28, 3),
+            self.try_get_value(results, 28, 4),
         ]
 
         # 17 to 32: 3 and 4 in race 17 to 24
         b = [
-            self.try_get_value(results, 'Race 17', 3),
-            self.try_get_value(results, 'Race 17', 4),
-            self.try_get_value(results, 'Race 18', 3),
-            self.try_get_value(results, 'Race 18', 4),
-            self.try_get_value(results, 'Race 19', 3),
-            self.try_get_value(results, 'Race 19', 4),
-            self.try_get_value(results, 'Race 20', 3),
-            self.try_get_value(results, 'Race 20', 4),
-            self.try_get_value(results, 'Race 21', 3),
-            self.try_get_value(results, 'Race 21', 4),
-            self.try_get_value(results, 'Race 22', 3),
-            self.try_get_value(results, 'Race 22', 4),
-            self.try_get_value(results, 'Race 23', 3),
-            self.try_get_value(results, 'Race 23', 4),
-            self.try_get_value(results, 'Race 24', 3),
-            self.try_get_value(results, 'Race 24', 4),
+            self.try_get_value(results, 17, 3),
+            self.try_get_value(results, 17, 4),
+            self.try_get_value(results, 18, 3),
+            self.try_get_value(results, 18, 4),
+            self.try_get_value(results, 19, 3),
+            self.try_get_value(results, 19, 4),
+            self.try_get_value(results, 20, 3),
+            self.try_get_value(results, 20, 4),
+            self.try_get_value(results, 21, 3),
+            self.try_get_value(results, 21, 4),
+            self.try_get_value(results, 22, 3),
+            self.try_get_value(results, 22, 4),
+            self.try_get_value(results, 23, 3),
+            self.try_get_value(results, 23, 4),
+            self.try_get_value(results, 24, 3),
+            self.try_get_value(results, 24, 4),
         ]
 
         # 33 to 64: 3 and 4 in race 1 to 16
         c = [
-            self.try_get_value(results, 'Race 1', 3),
-            self.try_get_value(results, 'Race 1', 4),
-            self.try_get_value(results, 'Race 2', 3),
-            self.try_get_value(results, 'Race 2', 4),
-            self.try_get_value(results, 'Race 3', 3),
-            self.try_get_value(results, 'Race 3', 4),
-            self.try_get_value(results, 'Race 4', 3),
-            self.try_get_value(results, 'Race 4', 4),
-            self.try_get_value(results, 'Race 5', 3),
-            self.try_get_value(results, 'Race 5', 4),
-            self.try_get_value(results, 'Race 6', 3),
-            self.try_get_value(results, 'Race 6', 4),
-            self.try_get_value(results, 'Race 7', 3),
-            self.try_get_value(results, 'Race 7', 4),
-            self.try_get_value(results, 'Race 8', 3),
-            self.try_get_value(results, 'Race 8', 4),
-            self.try_get_value(results, 'Race 9', 3),
-            self.try_get_value(results, 'Race 9', 4),
-            self.try_get_value(results, 'Race 10', 3),
-            self.try_get_value(results, 'Race 10', 4),
-            self.try_get_value(results, 'Race 11', 3),
-            self.try_get_value(results, 'Race 11', 4),
-            self.try_get_value(results, 'Race 12', 3),
-            self.try_get_value(results, 'Race 12', 4),
-            self.try_get_value(results, 'Race 13', 3),
-            self.try_get_value(results, 'Race 13', 4),
-            self.try_get_value(results, 'Race 14', 3),
-            self.try_get_value(results, 'Race 14', 4),
-            self.try_get_value(results, 'Race 15', 3),
-            self.try_get_value(results, 'Race 15', 4),
-            self.try_get_value(results, 'Race 16', 3),
-            self.try_get_value(results, 'Race 16', 4),
+            self.try_get_value(results, 1, 3),
+            self.try_get_value(results, 1, 4),
+            self.try_get_value(results, 2, 3),
+            self.try_get_value(results, 2, 4),
+            self.try_get_value(results, 3, 3),
+            self.try_get_value(results, 3, 4),
+            self.try_get_value(results, 4, 3),
+            self.try_get_value(results, 4, 4),
+            self.try_get_value(results, 5, 3),
+            self.try_get_value(results, 5, 4),
+            self.try_get_value(results, 6, 3),
+            self.try_get_value(results, 6, 4),
+            self.try_get_value(results, 7, 3),
+            self.try_get_value(results, 7, 4),
+            self.try_get_value(results, 8, 3),
+            self.try_get_value(results, 8, 4),
+            self.try_get_value(results, 9, 3),
+            self.try_get_value(results, 9, 4),
+            self.try_get_value(results, 10, 3),
+            self.try_get_value(results, 10, 4),
+            self.try_get_value(results, 11, 3),
+            self.try_get_value(results, 11, 4),
+            self.try_get_value(results, 12, 3),
+            self.try_get_value(results, 12, 4),
+            self.try_get_value(results, 13, 3),
+            self.try_get_value(results, 13, 4),
+            self.try_get_value(results, 14, 3),
+            self.try_get_value(results, 14, 4),
+            self.try_get_value(results, 15, 3),
+            self.try_get_value(results, 15, 4),
+            self.try_get_value(results, 16, 3),
+            self.try_get_value(results, 16, 4),
         ]
 
         # Sort them based on qualifications
@@ -428,14 +434,14 @@ class FaiRank():
 
         # Build our final leaderboard
         return [
-            self.try_get_value(results, 'Final', 1),
-            self.try_get_value(results, 'Final', 2),
-            self.try_get_value(results, 'Final', 3),
-            self.try_get_value(results, 'Final', 4),
-            self.try_get_value(results, 'Small Final', 1),
-            self.try_get_value(results, 'Small Final', 2),
-            self.try_get_value(results, 'Small Final', 3),
-            self.try_get_value(results, 'Small Final', 4),
+            self.try_get_value(results, 32, 1),
+            self.try_get_value(results, 32, 2),
+            self.try_get_value(results, 32, 3),
+            self.try_get_value(results, 32, 4),
+            self.try_get_value(results, 31, 1),
+            self.try_get_value(results, 31, 2),
+            self.try_get_value(results, 31, 3),
+            self.try_get_value(results, 31, 4),
             a[0],
             a[1],
             a[2],
@@ -497,42 +503,42 @@ class FaiRank():
     def build_leaderboard_fai32de(self, results, q_pilots):
         # 9 to 12: 3 and 4 in race 25 and 26
         a = [
-            self.try_get_value(results, 'Race 25', 3),
-            self.try_get_value(results, 'Race 25', 4),
-            self.try_get_value(results, 'Race 26', 3),
-            self.try_get_value(results, 'Race 26', 4),
+            self.try_get_value(results, 25, 3),
+            self.try_get_value(results, 25, 4),
+            self.try_get_value(results, 26, 3),
+            self.try_get_value(results, 26, 4),
         ]
 
         # 13 to 16: 3 and 4 in race 21 and 22
         b = [
-            self.try_get_value(results, 'Race 21', 3),
-            self.try_get_value(results, 'Race 21', 4),
-            self.try_get_value(results, 'Race 22', 3),
-            self.try_get_value(results, 'Race 22', 4),
+            self.try_get_value(results, 21, 3),
+            self.try_get_value(results, 21, 4),
+            self.try_get_value(results, 22, 3),
+            self.try_get_value(results, 22, 4),
         ]
 
         # 17 to 24: 3 and 4 in race 17 to 20
         c = [
-            self.try_get_value(results, 'Race 17', 3),
-            self.try_get_value(results, 'Race 17', 4),
-            self.try_get_value(results, 'Race 18', 3),
-            self.try_get_value(results, 'Race 18', 4),
-            self.try_get_value(results, 'Race 19', 3),
-            self.try_get_value(results, 'Race 19', 4),
-            self.try_get_value(results, 'Race 20', 3),
-            self.try_get_value(results, 'Race 20', 4),
+            self.try_get_value(results, 17, 3),
+            self.try_get_value(results, 17, 4),
+            self.try_get_value(results, 18, 3),
+            self.try_get_value(results, 18, 4),
+            self.try_get_value(results, 19, 3),
+            self.try_get_value(results, 19, 4),
+            self.try_get_value(results, 20, 3),
+            self.try_get_value(results, 20, 4),
         ]
 
         # 25 to 32: 3 and 4 in race 13 to 16
         d = [
-            self.try_get_value(results, 'Race 13', 3),
-            self.try_get_value(results, 'Race 13', 4),
-            self.try_get_value(results, 'Race 14', 3),
-            self.try_get_value(results, 'Race 14', 4),
-            self.try_get_value(results, 'Race 15', 3),
-            self.try_get_value(results, 'Race 15', 4),
-            self.try_get_value(results, 'Race 16', 3),
-            self.try_get_value(results, 'Race 16', 4),
+            self.try_get_value(results, 13, 3),
+            self.try_get_value(results, 13, 4),
+            self.try_get_value(results, 14, 3),
+            self.try_get_value(results, 14, 4),
+            self.try_get_value(results, 15, 3),
+            self.try_get_value(results, 15, 4),
+            self.try_get_value(results, 16, 3),
+            self.try_get_value(results, 16, 4),
         ]
 
         # Sort them based on qualifications
@@ -543,14 +549,14 @@ class FaiRank():
 
         # Build our final leaderboard
         return [
-            self.try_get_value(results, 'Final', 1),
-            self.try_get_value(results, 'Final', 2),
-            self.try_get_value(results, 'Final', 3),
-            self.try_get_value(results, 'Final', 4),
-            self.try_get_value(results, 'Race 29', 3),
-            self.try_get_value(results, 'Race 29', 4),
-            self.try_get_value(results, 'Race 27', 3),
-            self.try_get_value(results, 'Race 27', 4),
+            self.try_get_value(results, 30, 1),
+            self.try_get_value(results, 30, 2),
+            self.try_get_value(results, 30, 3),
+            self.try_get_value(results, 30, 4),
+            self.try_get_value(results, 29, 3),
+            self.try_get_value(results, 29, 4),
+            self.try_get_value(results, 27, 3),
+            self.try_get_value(results, 27, 4),
             a[0],
             a[1],
             a[2],
@@ -580,34 +586,34 @@ class FaiRank():
     def build_leaderboard_fai32(self, results, q_pilots):
         # 9 to 16: 3 and 4 in race 9 to 12
         a = [
-            self.try_get_value(results, 'Race 9', 3),
-            self.try_get_value(results, 'Race 9', 4),
-            self.try_get_value(results, 'Race 10', 3),
-            self.try_get_value(results, 'Race 10', 4),
-            self.try_get_value(results, 'Race 11', 3),
-            self.try_get_value(results, 'Race 11', 4),
-            self.try_get_value(results, 'Race 12', 3),
-            self.try_get_value(results, 'Race 12', 4),
+            self.try_get_value(results, 9, 3),
+            self.try_get_value(results, 9, 4),
+            self.try_get_value(results, 10, 3),
+            self.try_get_value(results, 10, 4),
+            self.try_get_value(results, 11, 3),
+            self.try_get_value(results, 11, 4),
+            self.try_get_value(results, 12, 3),
+            self.try_get_value(results, 12, 4),
         ]
 
         # 17 to 32: 3 and 4 in race 1 to 8
         b = [
-            self.try_get_value(results, 'Race 1', 3),
-            self.try_get_value(results, 'Race 1', 4),
-            self.try_get_value(results, 'Race 2', 3),
-            self.try_get_value(results, 'Race 2', 4),
-            self.try_get_value(results, 'Race 3', 3),
-            self.try_get_value(results, 'Race 3', 4),
-            self.try_get_value(results, 'Race 4', 3),
-            self.try_get_value(results, 'Race 4', 4),
-            self.try_get_value(results, 'Race 5', 3),
-            self.try_get_value(results, 'Race 5', 4),
-            self.try_get_value(results, 'Race 6', 3),
-            self.try_get_value(results, 'Race 6', 4),
-            self.try_get_value(results, 'Race 7', 3),
-            self.try_get_value(results, 'Race 7', 4),
-            self.try_get_value(results, 'Race 8', 3),
-            self.try_get_value(results, 'Race 8', 4),
+            self.try_get_value(results, 1, 3),
+            self.try_get_value(results, 1, 4),
+            self.try_get_value(results, 2, 3),
+            self.try_get_value(results, 2, 4),
+            self.try_get_value(results, 3, 3),
+            self.try_get_value(results, 3, 4),
+            self.try_get_value(results, 4, 3),
+            self.try_get_value(results, 4, 4),
+            self.try_get_value(results, 5, 3),
+            self.try_get_value(results, 5, 4),
+            self.try_get_value(results, 6, 3),
+            self.try_get_value(results, 6, 4),
+            self.try_get_value(results, 7, 3),
+            self.try_get_value(results, 7, 4),
+            self.try_get_value(results, 8, 3),
+            self.try_get_value(results, 8, 4),
         ]
 
         # Sort them based on qualifications
@@ -616,14 +622,14 @@ class FaiRank():
 
         # Build our final leaderboard
         return [
-            self.try_get_value(results, 'Final', 1),
-            self.try_get_value(results, 'Final', 2),
-            self.try_get_value(results, 'Final', 3),
-            self.try_get_value(results, 'Final', 4),
-            self.try_get_value(results, 'Small Final', 1),
-            self.try_get_value(results, 'Small Final', 2),
-            self.try_get_value(results, 'Small Final', 3),
-            self.try_get_value(results, 'Small Final', 4),
+            self.try_get_value(results, 16, 1),
+            self.try_get_value(results, 16, 2),
+            self.try_get_value(results, 16, 3),
+            self.try_get_value(results, 16, 4),
+            self.try_get_value(results, 15, 1),
+            self.try_get_value(results, 15, 2),
+            self.try_get_value(results, 15, 3),
+            self.try_get_value(results, 15, 4),
             a[0],
             a[1],
             a[2],
@@ -653,17 +659,17 @@ class FaiRank():
     def build_leaderboard_fai16de(self, results, q_pilots):
         # 9 to 12: 3 and 4 in race 9 and 10
         a = [
-            self.try_get_value(results, 'Race 10', 3),
-            self.try_get_value(results, 'Race 10', 4),
-            self.try_get_value(results, 'Race 9', 3),
-            self.try_get_value(results, 'Race 9', 4),
+            self.try_get_value(results, 10, 3),
+            self.try_get_value(results, 10, 4),
+            self.try_get_value(results, 9, 3),
+            self.try_get_value(results, 9, 4),
         ]
         # 13 to 16: 3 and 4 in race 5 and 6
         b = [
-            self.try_get_value(results, 'Race 6', 3),
-            self.try_get_value(results, 'Race 6', 4),
-            self.try_get_value(results, 'Race 5', 3),
-            self.try_get_value(results, 'Race 5', 4),
+            self.try_get_value(results, 6, 3),
+            self.try_get_value(results, 6, 4),
+            self.try_get_value(results, 5, 3),
+            self.try_get_value(results, 5, 4),
         ]
 
         # Sort them based on qualifications
@@ -672,14 +678,14 @@ class FaiRank():
 
         # Build our final leaderboard
         return [
-            self.try_get_value(results, 'Final', 1),
-            self.try_get_value(results, 'Final', 2),
-            self.try_get_value(results, 'Final', 3),
-            self.try_get_value(results, 'Final', 4),
-            self.try_get_value(results, 'Race 13', 3),
-            self.try_get_value(results, 'Race 13', 4),
-            self.try_get_value(results, 'Race 11', 3),
-            self.try_get_value(results, 'Race 11', 4),
+            self.try_get_value(results, 14, 1),
+            self.try_get_value(results, 14, 2),
+            self.try_get_value(results, 14, 3),
+            self.try_get_value(results, 14, 4),
+            self.try_get_value(results, 13, 3),
+            self.try_get_value(results, 13, 4),
+            self.try_get_value(results, 11, 3),
+            self.try_get_value(results, 11, 4),
             a[0],
             a[1],
             a[2],
@@ -693,14 +699,14 @@ class FaiRank():
     def build_leaderboard_fai16(self, results, q_pilots):
         # 9 to 16: 3 and 4 in race 1 to 4
         a = [
-            self.try_get_value(results, 'Race 1', 3),
-            self.try_get_value(results, 'Race 1', 4),
-            self.try_get_value(results, 'Race 2', 3),
-            self.try_get_value(results, 'Race 2', 4),
-            self.try_get_value(results, 'Race 3', 3),
-            self.try_get_value(results, 'Race 3', 4),
-            self.try_get_value(results, 'Race 4', 3),
-            self.try_get_value(results, 'Race 4', 4),
+            self.try_get_value(results, 1, 3),
+            self.try_get_value(results, 1, 4),
+            self.try_get_value(results, 2, 3),
+            self.try_get_value(results, 2, 4),
+            self.try_get_value(results, 3, 3),
+            self.try_get_value(results, 3, 4),
+            self.try_get_value(results, 4, 3),
+            self.try_get_value(results, 4, 4),
         ]
 
         # Sort them based on qualifications
@@ -708,14 +714,14 @@ class FaiRank():
 
         # Build our final leaderboard
         return [
-            self.try_get_value(results, 'Final', 1),
-            self.try_get_value(results, 'Final', 2),
-            self.try_get_value(results, 'Final', 3),
-            self.try_get_value(results, 'Final', 4),
-            self.try_get_value(results, 'Small Final', 1),
-            self.try_get_value(results, 'Small Final', 2),
-            self.try_get_value(results, 'Small Final', 3),
-            self.try_get_value(results, 'Small Final', 4),
+            self.try_get_value(results, 8, 1),
+            self.try_get_value(results, 8, 2),
+            self.try_get_value(results, 8, 3),
+            self.try_get_value(results, 8, 4),
+            self.try_get_value(results, 7, 1),
+            self.try_get_value(results, 7, 2),
+            self.try_get_value(results, 7, 3),
+            self.try_get_value(results, 7, 4),
             a[0],
             a[1],
             a[2],
@@ -730,28 +736,28 @@ class FaiRank():
         """These are not official in FAI but that's great to have it"""
         # Build our final leaderboard
         return [
-            self.try_get_value(results, 'Final', 1),
-            self.try_get_value(results, 'Final', 2),
-            self.try_get_value(results, 'Final', 3),
-            self.try_get_value(results, 'Final', 4),
-            self.try_get_value(results, 'Race 5', 3),
-            self.try_get_value(results, 'Race 5', 4),
-            self.try_get_value(results, 'Race 3', 3),
-            self.try_get_value(results, 'Race 3', 4),
+            self.try_get_value(results, 6, 1),
+            self.try_get_value(results, 6, 2),
+            self.try_get_value(results, 6, 3),
+            self.try_get_value(results, 6, 4),
+            self.try_get_value(results, 5, 3),
+            self.try_get_value(results, 5, 4),
+            self.try_get_value(results, 3, 3),
+            self.try_get_value(results, 3, 4),
         ]
 
     def build_leaderboard_fai8(self, results, q_pilots):
         """These are not official in FAI but that's great to have it"""
         # Build our final leaderboard
         return [
-            self.try_get_value(results, 'Final', 1),
-            self.try_get_value(results, 'Final', 2),
-            self.try_get_value(results, 'Final', 3),
-            self.try_get_value(results, 'Final', 4),
-            self.try_get_value(results, 'Small Final', 1),
-            self.try_get_value(results, 'Small Final', 2),
-            self.try_get_value(results, 'Small Final', 3),
-            self.try_get_value(results, 'Small Final', 4),
+            self.try_get_value(results, 4, 1),
+            self.try_get_value(results, 4, 2),
+            self.try_get_value(results, 4, 3),
+            self.try_get_value(results, 4, 4),
+            self.try_get_value(results, 3, 1),
+            self.try_get_value(results, 3, 2),
+            self.try_get_value(results, 3, 3),
+            self.try_get_value(results, 3, 4),
         ]
 
     def guess_bracket(self, class_id):
