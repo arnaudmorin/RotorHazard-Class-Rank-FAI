@@ -1,0 +1,13 @@
+{
+    "name": "Class Rank: FAI",
+    "author": "Arnaud Morin",
+    "author_uri": "https://github.com/arnaudmorin",
+    "description": "Class ranking for FAI brackets (up to 64 pilots)",
+    "info_uri": "https://github.com/arnaudmorin/RotorHazard-Class-Rank-FAI",
+    "license": "APACHE",
+    "license_uri": "https://github.com/arnaudmorin/RotorHazard-Class-Rank-FAI/blob/main/LICENSE",
+    "version": "1.0.0",
+    "required_rhapi_version": "1.0",
+    "update_uri": null,
+    "text_domain": null
+}
